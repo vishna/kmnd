@@ -17,6 +17,7 @@ dependencies {
     compile(kotlin("stdlib-jdk8"))
     compile("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.0.1")
     compile("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.0.1")
+    compile("org.apache.commons:commons-lang3:3.9")
 
     testCompile("junit", "junit", "4.12")
     testCompile("org.amshove.kluent:kluent:1.34")

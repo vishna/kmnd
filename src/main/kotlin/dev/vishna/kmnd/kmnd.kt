@@ -1,6 +1,7 @@
 package dev.vishna.kmnd
 
 import kotlinx.coroutines.*
+import org.apache.commons.lang3.SystemUtils
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -14,14 +15,20 @@ suspend fun List<String>.execute(
 suspend fun List<String>.execute(
     redirectErrorStream: Boolean? = null,
     streamHandler: (suspend (InputStream, InputStream) -> Unit)
-) = execute(redirectErrorStream = redirectErrorStream) { _, inputStream, errorStream -> streamHandler(inputStream, errorStream) }
+) = execute(redirectErrorStream = redirectErrorStream) { _, inputStream, errorStream ->
+    streamHandler(
+        inputStream,
+        errorStream
+    )
+}
 
 /**
  * In case of empty list, value 126 is returned which is a UNIX code for "Command invoked cannot execute"
  */
 suspend fun List<String>.execute(
     redirectErrorStream: Boolean? = false,
-    streamHandler: (suspend (OutputStream, InputStream, InputStream) -> Unit)) : Int = coroutineScope {
+    streamHandler: (suspend (OutputStream, InputStream, InputStream) -> Unit)
+): Int = coroutineScope {
     suspendCancellableCoroutine<Int> { continuation ->
 
         if (this@execute.isEmpty()) {
@@ -49,7 +56,13 @@ suspend fun List<String>.execute(
     }
 }
 
-private fun String.shList() = listOf("/bin/sh", "-c", this)
+private fun String.shList(): List<String> {
+    return if (SystemUtils.IS_OS_WINDOWS) {
+        listOf("CMD", "/C", this)
+    } else {
+        listOf("/bin/sh", "-c", this)
+    }
+}
 
 suspend fun String.sh(
     redirectErrorStream: Boolean = false,
@@ -93,4 +106,4 @@ suspend infix fun String.weaveToBlocking(outputStream: OutputStream) {
     this.asInputStream() weaveToBlocking outputStream
 }
 
-fun String.asInputStream() : InputStream = ByteArrayInputStream(this.toByteArray(Charsets.UTF_8))
+fun String.asInputStream(): InputStream = ByteArrayInputStream(this.toByteArray(Charsets.UTF_8))
