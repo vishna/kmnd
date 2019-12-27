@@ -56,7 +56,7 @@ suspend fun List<String>.execute(
     }
 }
 
-private fun String.shList(): List<String> {
+fun String.shList(): List<String> {
     return if (SystemUtils.IS_OS_WINDOWS) {
         listOf("CMD", "/C", this)
     } else {
